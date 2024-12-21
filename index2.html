@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map Drawing Tool</title>
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <!-- Leaflet Draw CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+
+    <style>
+      #map {
+        height: 600px;
+        width: 100%;
+      }
+      .coordinate-display {
+        background-color: white;
+        padding: 5px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Draw JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <!-- Your JavaScript file -->
+    <script>
+      // Initialize the map
+      const map = L.map("map").setView([32.4279, 53.688], 5); // Centered on Iran
+      // Add the tile layer (OpenStreetMap)
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Drawing Tool Setup
+      const drawnItems = new L.FeatureGroup();
+      map.addLayer(drawnItems);
+
+      const drawControl = new L.Control.Draw({
+        draw: {
+          polygon: true,
+          marker: true,
+          circle: true,
+          rectangle: true,
+          polyline: true,
+          circlemarker: true,
+        },
+        edit: {
+          featureGroup: drawnItems,
+          remove: true,
+        },
+      });
+      map.addControl(drawControl);
+
+      // Handle drawn items
+      map.on("draw:created", function (e) {
+        const layer = e.layer;
+        drawnItems.addLayer(layer);
+
+        // Get the coordinates of the drawn polygon
+        const coordinates = layer
+          .getLatLngs()[0]
+          .map((point) => [point.lng, point.lat]);
+
+        // Display coordinates in console
+        console.log("Polygon Coordinates:");
+        console.log(JSON.stringify(coordinates));
+
+        // Optional: Create GeoJSON object
+        const geoJSON = {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+        };
+        console.log("GeoJSON format:");
+        console.log(JSON.stringify(geoJSON));
+      });
+
+      // Handle edited items
+      map.on("draw:edited", function (e) {
+        const layers = e.layers;
+        layers.eachLayer(function (layer) {
+          const coordinates = layer
+            .getLatLngs()[0]
+            .map((point) => [point.lng, point.lat]);
+          console.log("Updated Coordinates:");
+          console.log(JSON.stringify(coordinates));
+        });
+      });
+
+      // Coordinate Display Setup
+      // Create a custom control for coordinate display
+      const coordDisplay = L.control({ position: "bottomleft" });
+
+      coordDisplay.onAdd = function (map) {
+        const div = L.DomUtil.create("div", "coordinate-display");
+        div.style.backgroundColor = "white";
+        div.style.padding = "5px";
+        div.style.border = "2px solid #ccc";
+        div.style.borderRadius = "5px";
+        div.style.fontSize = "12px";
+        div.innerHTML = "Move mouse over map";
+        return div;
+      };
+
+      coordDisplay.addTo(map);
+
+      // Update coordinates on mouse move
+      map.on("mousemove", function (e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        document.querySelector(
+          ".coordinate-display"
+        ).innerHTML = `Lat: ${lat}<br>Lng: ${lng}`;
+      });
+
+      // Optional: Add click event to copy coordinates
+      map.on("click", function (e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        console.log(`[${lng}, ${lat}]`);
+      });
+    </script>
+  </body>
+</html>

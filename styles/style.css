@@ -1,0 +1,42 @@
+:root {
+  --color_primary: #2f79f2;
+  --color_primary_dark: #1d5bbf;
+  --color_primary_light_50: #f6faff;
+  --color_backdrop: #00000080;
+
+  --color_toast_success: #4caf50;
+  --color_toast_error: #f44336;
+  --color_toast_warning: #ff9800;
+  --color_toast_info: #2196f3;
+}
+
+/* مارکر دایره تپنده موقعیت کاربر */
+circle.inner-circle {
+  fill: var(--color_primary_dark);
+}
+circle.pulsing-circle {
+  animation: pulse 2s forwards infinite;
+  fill: var(--color_primary);
+}
+@keyframes pulse {
+  0% {
+    r: 10; /* شعاع اولیه */
+    opacity: 0.5; /* شفافیت اولیه */
+  }
+  100% {
+    r: 25; /* شعاع نهایی */
+    opacity: 0; /* شفافیت نهایی */
+  }
+}
+
+/* فونت ها */
+@font-face {
+  font-family: "iransans-fd";
+  src: url(../fonts/iransans_fd.TTF);
+}
+
+/* حذف مقادیر پیش فرض برای تنظیم راحت تر */
+body {
+  margin: 0;
+  padding: 0;
+}
