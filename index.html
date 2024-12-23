@@ -56,10 +56,12 @@
     <!-- سفحه جستجو -->
     <section id="search-sheet">
       <!-- بخش بالایی -->
-      <h3 class="title">مبدأ</h3>
-      <!-- دکمه بستن صفحه جستجو -->
-      <button id="search-close-btn" class="close-btn">&times;</button>
-
+      <div class="top-bar">
+        <!-- عنوان -->
+        <h3 class="title">مبدأ</h3>
+        <!-- دکمه بستن صفحه جستجو -->
+        <button id="search-close-btn" class="close-btn">&times;</button>
+      </div>
       <div class="content">
         <!-- فیلد جستجو -->
         <div class="input-container">
@@ -71,7 +73,7 @@
           <input
             id="search-input"
             type="text"
-            placeholder="کجا هستید؟"
+            placeholder="در جستجوی چه مکانی هستید؟"
             autocomplete="off"
           />
           <img
@@ -82,7 +84,12 @@
           />
         </div>
         <!-- مکان های ذخیره شده -->
-        <div id="bookmarks"></div>
+        <div id="bookmarks-container"></div>
+        <!-- جستجوهای اخیر -->
+        <div id="history-container">
+          <span>جستجوهای اخیر</span>
+          <ul id="history-list" class="list"></ul>
+        </div>
         <!-- نمایش نتیجه جستجو -->
         <div class="result-container">
           <!-- حالت خالی -->
@@ -94,10 +101,6 @@
             <h2>نتیجه ای نگرفتیم</h2>
             <p>مکان مورد نظر شما را نیافتیم عبارت دیگری را جستجو کنید</p>
           </div>
-          <!-- جستجوهای اخیر -->
-          <div id="search-history">
-            <span>جستجوهای اخیر</span>
-          </div>
           <!-- لیست نتایج جستجو -->
           <ul id="search-list" class="list"></ul>
         </div>
@@ -105,7 +108,9 @@
     </section>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
-    <script src="toast.js"></script>
+    <script src="./scripts//classes/neshan.js"></script>
+    <script src="./scripts/classes/nominatim.js"></script>
+    <script src="./scripts/classes/toast.js"></script>
+    <script src="./scripts/script.js"></script>
   </body>
 </html>

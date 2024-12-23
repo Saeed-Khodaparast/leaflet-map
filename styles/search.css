@@ -3,8 +3,7 @@
 /* ---------------- */
 #search-sheet {
   position: fixed;
-  padding: 16px 0;
-  height: 90%;
+  height: 95%;
   bottom: -100%; /* مخفی بصورت پیش فرض */
   left: 0;
   right: 0;
@@ -13,6 +12,7 @@
   align-items: center;
   background-color: white;
   border-radius: 16px 16px 0 0;
+  box-sizing: border-box;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
   transition: all 500ms ease;
   z-index: 1000;
@@ -23,8 +23,17 @@
   bottom: 0;
 }
 
+#search-sheet .top-bar {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
 /* عنوان صفحه جستجو */
-#search-sheet .title {
+#search-sheet .top-bar .title {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -32,12 +41,12 @@
   font-family: iransans-fd, sans-serif;
 }
 /* دکمه بستن صفحه جستجو */
-#search-sheet .close-btn {
+#search-sheet .top-bar .close-btn {
   width: 40px;
   height: 40px;
   position: absolute;
   left: 24px;
-  top: 16px;
+  top: calc(50% - 20px);
   border: none;
   border-radius: 8px;
   background-color: transparent;
@@ -55,35 +64,72 @@
 /* محتوای اصلی صفحه جستجو */
 #search-sheet .content {
   width: 100%;
-  margin-top: 16px;
+  flex-grow: 1;
   padding: 0 24px;
   box-sizing: border-box;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
 }
 /* کانتینر فیلد جستجو */
-#search-sheet .input-container {
+#search-sheet .content .input-container {
   width: 100%;
-  height: 70px;
+  min-height: 64px;
+  margin-top: 16px;
   position: relative;
 }
 
 /* --------------------- */
 /* #region تاریخچه جستجو */
 /* --------------------- */
-#search-history {
+#history-container {
+  width: 100%;
+  flex-grow: 1;
+  margin: 48px 0 8px 0;
+  flex-direction: column;
   display: none;
 }
-#search-history.open {
-  display: block;
+#history-container.open {
+  display: flex;
 }
-#search-history span {
+/* استایل دهی به فقط به زیرمجموعه های اول */
+#history-container > span {
   font-family: iransans-fd, sans-serif;
   color: #858585;
   font-size: 16px;
-  margin: 24px 8px;
+  margin: 0 8px;
+}
+#history-container .list {
+  margin: 24px 0 8px 0;
+  position: relative;
+}
+.clear-item-btn {
+  position: absolute;
+  left: 24px;
+  opacity: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 600ms ease;
+}
+.clear-item-btn:hover {
+  background-color: #e0e0e0;
+}
+/* × symbol inside button */
+.clear-item-btn::before {
+  content: "×";
+  font-size: 20px;
+  color: #666;
+}
+/* Show button on list item hover */
+.list li:hover .clear-item-btn {
+  opacity: 1;
 }
 
 /* #endregion تاریخچه جستجو */
@@ -93,14 +139,14 @@
 /* ------------------- */
 #search-sheet .result-container {
   width: 100%;
-  height: 80%;
-  margin: 24px 0;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* حالت خالی */
 #empty-state {
-  height: 100%;
-  padding: 60px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -128,54 +174,53 @@
 }
 
 /* لیست نتایج */
-#search-sheet .result-container .list {
+.list {
   width: 100%;
-  margin: 0;
-  padding: 24px 8px;
-  height: 100%;
+  margin: 48px 0 8px 0;
+  padding: 0 8px;
   list-style: none;
-}
-/* لیست نتایج در حالت عدم نمایش */
-#search-sheet .result-container .list .hidden {
   display: none;
+}
+/* نمایش لیست نتایج */
+.list.open {
+  display: block;
 }
 
 /* لیست آیتم */
-#search-sheet .result-container .list-item {
+.list-item {
   padding: 16px 0;
   font-family: iransans-fd, sans-serif;
   cursor: pointer;
   width: 100%;
   display: flex;
-  align-items: top;
   gap: 24px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 /* آیکون لیست آیتم */
-#search-sheet .result-container .list-item-image {
+.list-item-image {
   width: 40px;
   height: 40px;
   margin-right: 8px;
 }
 /* کانتینر متن لیست آیتم */
-#search-sheet .result-container .text-container {
+.list .text-container {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 /* عنوان لیست آیتم */
-#search-sheet .result-container .text-container h3 {
+.list .text-container h3 {
   margin: 0;
   font-size: 1.2em;
 }
 /* آدرس لیست آیتم */
-#search-sheet .result-container .text-container p {
+.list .text-container p {
   margin: 0;
   font-size: 0.9em;
   color: gray;
 }
 /* زیر خط لیست آیتم */
-#search-sheet .result-container .underline {
+.list .underline {
   width: 100%;
   height: 2px;
   margin-top: 16px;
