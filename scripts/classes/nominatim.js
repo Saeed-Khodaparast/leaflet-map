@@ -28,8 +28,6 @@ class Nominatim {
 
       const response = await fetch(url, {
         headers: this.headers,
-        // Add delay to respect usage policy
-        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) {
@@ -96,14 +94,5 @@ class Nominatim {
     } catch (error) {
       throw error;
     }
-  }
-
-  /**
-   * Add delay between requests to respect Nominatim usage policy
-   * @param {number} ms - Milliseconds to delay
-   * @returns {Promise} Promise that resolves after the delay
-   */
-  static delay(ms = 1000) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
