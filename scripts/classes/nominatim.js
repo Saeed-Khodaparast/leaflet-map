@@ -1,6 +1,7 @@
 class Nominatim {
   constructor() {
-    // API endpoints
+    this.timer = null;
+    this.timeout = 1000;
     this.endpoints = {
       reverse: "https://nominatim.openstreetmap.org/reverse",
       search: "https://nominatim.openstreetmap.org/search",
@@ -88,11 +89,25 @@ class Nominatim {
    * @returns {Promise<boolean>} Promise that resolves to true if coordinates are in the specified country
    */
   async checkCountry(lat, lng, countryCode) {
-    try {
-      const data = await this.reverseGeocode(lat, lng);
-      return data?.address?.country_code === countryCode.toLowerCase();
-    } catch (error) {
-      throw error;
-    }
+    return new Promise((resolve, reject) => {
+      // Clear any existing timeout
+      if (this.timer) {
+        clearTimeout(this.timer);
+        console.log("Check Country Timer Cleared");
+      }
+
+      // Set new timeout
+      this.timer = setTimeout(async () => {
+        try {
+          const data = await this.reverseGeocode(lat, lng);
+          const result =
+            data?.address?.country_code === countryCode.toLowerCase();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      }, this.timeout);
+      console.log("Check Country Timer Set");
+    });
   }
 }

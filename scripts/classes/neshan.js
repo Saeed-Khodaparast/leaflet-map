@@ -97,4 +97,6 @@ class Neshan {
       throw error;
     }
   }
+
+  async checkCity() {}
 }

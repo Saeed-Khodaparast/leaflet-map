@@ -1,11 +1,14 @@
-// ----------------
 // #region ثابت ها
-// ----------------
-const TEHRAN_COORDINATES = [35.6892, 51.389]; // مختصات تهران
+
+const TEHRAN_COORDINATES = [35.688812, 51.389626];
+const TABRIZ_COORDINATES = [38.074109, 46.29626];
+const ZANJAN_COORDINATES = [36.679453, 48.499864];
+
 const DORSA_API_KEY = "service.c97de0690591474fa692d23586344505";
 // میزان تاخیر به میلی ثانیه برای فیلد جستجو
 const SEARCH_INPUT_DELAY = 500;
 const SEARCH_HISTORY_KEY = "searchHistory";
+const CHECK_COUNTRY_DELAY = 1000;
 
 // DOM
 const returnBtn = document.getElementById("return-btn");
@@ -53,9 +56,8 @@ const userMarkerIcon = L.divIcon({
 
 // #endregion ثابت ها
 
-// -----------------
 // #region متغیر ها
-// -----------------
+
 /** نقشه */
 let map;
 /** آیدی تایمر فیلد جستجو */
@@ -66,7 +68,6 @@ let isModalOpen;
 let isSearchOpen;
 /** فعال و غیر فعالسازی نومیناتیم رورس ای پی آی */
 let isNominatimReverseEnabled = true;
-/** فعال و غیر فعالسازی نشان رورس ای پی آی */
 let isNeshanReverseEnabled = true;
 /** فعال و غیر فعالسازی نشان ژوکودینگ ای پی آی */
 let isNeshanGeocodingEnabled = true;
@@ -81,23 +82,30 @@ let firstLaunch = true;
 
 // #endregion متغیر ها
 
-// --------------------
 // #region اجرای کد ها
-// --------------------
 
-// نمایش اولیه نقشه در موقعیت تهران
-initializeMap(TEHRAN_COORDINATES);
-// نمایش مختصات مکان کنونی
+// Initialize map
+map = L.map("map", {
+  center: TABRIZ_COORDINATES,
+  zoom: 13,
+});
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "© OpenStreetMap contributors",
+}).addTo(map);
+
+// Update show coordinates values
 updateCoordinates();
-// نمایش آدرس مکان کنونی
+
+// Show address in field
 const center = map.getCenter();
 isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
 
-// نظارت بر موقعیت کاربر به صورت مداوم
+// Check user location continously
 if (navigator.geolocation) {
   navigator.geolocation.watchPosition(updateUserPosition, (error) => {
     firstLaunch = false;
-    // اگر مارکر کاربر وجود دارد، آنرا حذف می کند
     removeUserMarker();
     resetUserLocation();
     switch (error.code) {
@@ -135,9 +143,7 @@ if (navigator.geolocation) {
 
 // #endregion اجرای کد ها
 
-// ------------------
-// #region رویداد ها
-// ------------------
+// #region Listeners
 
 // دکمه بازگشت به موقعیت کاربر
 returnBtn.addEventListener("click", () => {
@@ -150,7 +156,6 @@ returnBtn.addEventListener("click", () => {
   }
 });
 
-// رفتن مارکر به مکانی که کاربر کلیک کند
 map.on("click", function (e) {
   map.setView(e.latlng);
 });
@@ -161,14 +166,24 @@ map.on("move", updateCoordinates);
 // بلند شدن مارکر با حرکت نقشه
 map.on("movestart", function () {
   marker.classList.add("lifting");
+  outOfBorder.classList.remove("active");
 });
 
 //  پایین آمدن مارکر با توقف نقشه و حستجوی آدرس
 map.on("moveend", function () {
   marker.classList.remove("lifting");
   const center = map.getCenter();
-  isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
   isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+    console.log("Check Country Timer Cleared");
+  }
+  timeoutId = setTimeout(() => {
+    isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
+    checkCity(center.lat, center.lng);
+    console.log("Check Country Timer Set");
+  }, CHECK_COUNTRY_DELAY);
 });
 
 // باز شدن صفحه جستجو با فوکوس شدن فیلد یا کلیک روی آیکون
@@ -218,25 +233,9 @@ clearBtn.addEventListener("click", (e) => {
 // بسته شدن صفحه جستجو با زدن دکمه بستن
 searchCloseBtn.addEventListener("click", closeSearchSheet);
 
-// #endregion رویداد ها
+// #endregion Listeners
 
-// -----------------
-// #region تابع ها
-// -----------------
-
-/** نمایش اولیه نقشه افزودن لایه openstreetmap */
-function initializeMap(coordinates) {
-  map = L.map("map", {
-    center: coordinates, // تهران به‌عنوان مرکز اولیه
-    zoom: 13, // سطح زوم اولیه
-  });
-
-  // اضافه کردن لایه نقشه OpenStreetMap
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "© OpenStreetMap contributors",
-  }).addTo(map);
-}
+// #region Functions
 
 /** به‌روزرسانی مختصات در هنگام تغییر نقشه */
 function updateCoordinates() {
@@ -285,7 +284,6 @@ function showToast(message, options = {}) {
   toast.show(message, options);
 }
 
-/** باز کردن مودال */
 function showModal(message) {
   modal.textContent = message;
   backdrop.classList.add("active");
@@ -293,7 +291,6 @@ function showModal(message) {
   isModalOpen = true;
 }
 
-/** بستن مودال */
 function closeModal() {
   modal.textContent = "";
   backdrop.classList.remove("active");
@@ -301,7 +298,6 @@ function closeModal() {
   isModalOpen = false;
 }
 
-/** باز کردن صفحه جستجو */
 function openSearchSheet() {
   searchSheet.classList.add("open");
   backdrop.classList.add("active");
@@ -309,7 +305,6 @@ function openSearchSheet() {
   displaySearchHistory();
 }
 
-/** بستن صفحه جستجو */
 function closeSearchSheet() {
   resetSearchSheet();
   searchSheet.classList.remove("open");
@@ -564,7 +559,7 @@ function clearAllSearchHistory() {
   localStorage.removeItem(SEARCH_HISTORY_KEY);
 }
 
-/** اگر مارکر کاربر وجود دارد، آنرا حذف می کند */
+/** اگر مارکر کاربر وجود دارد، آنرا حذف می کند و در موقعیت جدید قرار می دهد*/
 function removeUserMarker() {
   if (userMarker) {
     map.removeLayer(userMarker);
@@ -608,4 +603,44 @@ function checkCountry(lat, lng) {
     });
 }
 
-// #endregion تابع ها
+function checkCity(lat, lng) {
+  nominatim
+    .reverseGeocode(lat, lng)
+    .then((data) => {
+      console.log("Nominatim Reverse response: ", data);
+      const city = data?.address?.city;
+      if (city !== "Tabriz" && city !== "Zanjan") {
+        console.log(
+          "Check City from Fetch: ",
+          `You are now viewing ${city}, outside of Tehran`
+        );
+        outOfBorder.classList.add("active");
+      } else {
+        outOfBorder.classList.remove("active");
+      }
+    })
+    .catch((error) => {
+      console.error("Nominatim Reverse Fetch Error: ", error);
+      showToast("خطایی رخ داده است لطفا دوباره امتحان کنید");
+    });
+}
+
+function setMapBoundsForCity(cityName) {
+  const city = CITIES_BOUNDS[cityName.toLowerCase()];
+  if (!city) return;
+
+  const cityBounds = L.latLngBounds([
+    [city.bounds.south, city.bounds.west],
+    [city.bounds.north, city.bounds.east],
+  ]);
+
+  map.setMaxBounds(cityBounds);
+  map.fitBounds(cityBounds);
+}
+
+// Check if point is within bounds
+function isPointInBounds(lat, lng) {
+  return bounds.contains(L.latLng(lat, lng));
+}
+
+// #endregion Functions
