@@ -1,0 +1,19 @@
+{
+  "name": "leaflet-map",
+  "version": "1.0.0",
+  "description": "leaflet-map for Dorsa Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saeed-Khodaparast/leaflet-map.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Saeed-Khodaparast/leaflet-map/issues"
+  },
+  "homepage": "https://github.com/Saeed-Khodaparast/leaflet-map#readme"
+}
