@@ -60,6 +60,7 @@ const userMarkerIcon = L.divIcon({
 
 /** نقشه */
 let map;
+let iranBoundary;
 /** آیدی تایمر فیلد جستجو */
 let timeoutId;
 /** تعیین وضعیت باز بودن مودال */
@@ -99,6 +100,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 fetch("iran-boundary.geojson")
   .then((response) => response.json())
   .then((data) => {
+    iranBoundary = data;
     // Add the GeoJSON layer to the map
     L.geoJSON(data, {
       style: {
@@ -188,11 +190,24 @@ map.on("movestart", function () {
 map.on("moveend", function () {
   marker.classList.remove("lifting");
   const center = map.getCenter();
+
+  if (iranBoundary) {
+    const isInside = isPointInPolygon([center.lat, center.lng], iranBoundary);
+
+    if (!isInside) {
+      console.log("Map center is outside Iran borders");
+      outOfBorder.classList.add("active");
+    } else {
+      console.log("Map center is inside Iran borders");
+      outOfBorder.classList.remove("active");
+    }
+  }
+
   isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
   if (timeoutId) {
     clearTimeout(timeoutId);
     timeoutId = null;
-    console.log("Check Country Timer Cleared");
+    //console.log("Check Country Timer Cleared");
   }
   timeoutId = setTimeout(() => {
     isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
@@ -656,6 +671,20 @@ function setMapBoundsForCity(cityName) {
 // Check if point is within bounds
 function isPointInBounds(lat, lng) {
   return bounds.contains(L.latLng(lat, lng));
+}
+
+function isPointInPolygon(point, geoJSON) {
+  // Create a Leaflet LatLng object from the point
+  const latLng = L.latLng(point[0], point[1]);
+
+  // Convert GeoJSON to a Leaflet layer
+  const polygonLayer = L.geoJSON(geoJSON);
+
+  // Use leaflet-pip to check if point is in any polygon
+  const results = leafletPip.pointInLayer(latLng, polygonLayer);
+
+  // If results array has any elements, the point is inside
+  return results.length > 0;
 }
 
 // #endregion Functions
