@@ -67,8 +67,8 @@ let isModalOpen;
 /** تعیین وضعیت باز بودن صفحه جستجو */
 let isSearchOpen;
 /** فعال و غیر فعالسازی نومیناتیم رورس ای پی آی */
-let isNominatimReverseEnabled = true;
-let isNeshanReverseEnabled = true;
+let isNominatimReverseEnabled = false;
+let isNeshanReverseEnabled = false;
 /** فعال و غیر فعالسازی نشان ژوکودینگ ای پی آی */
 let isNeshanGeocodingEnabled = true;
 /** فعال و غیر فعالسازی نشان سرچ ای پی آی */
@@ -94,6 +94,21 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
+
+// Load and parse the GeoJSON file
+fetch("iran-boundary.geojson")
+  .then((response) => response.json())
+  .then((data) => {
+    // Add the GeoJSON layer to the map
+    L.geoJSON(data, {
+      style: {
+        color: "#ff0000", // Border color
+        weight: 2, // Border width
+        fillColor: "#ff780022", // Fill color
+        fillOpacity: 0.2, // Fill opacity
+      },
+    }).addTo(map);
+  });
 
 // Update show coordinates values
 updateCoordinates();
@@ -181,8 +196,8 @@ map.on("moveend", function () {
   }
   timeoutId = setTimeout(() => {
     isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
-    checkCity(center.lat, center.lng);
-    console.log("Check Country Timer Set");
+    //checkCity(center.lat, center.lng);
+    //console.log("Check Country Timer Set");
   }, CHECK_COUNTRY_DELAY);
 });
 
