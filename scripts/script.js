@@ -97,7 +97,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 // Load and parse the GeoJSON file
-fetch("iran-boundary.geojson")
+fetch("tabriz-geojson.json")
   .then((response) => response.json())
   .then((data) => {
     iranBoundary = data;
