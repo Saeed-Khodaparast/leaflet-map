@@ -1,6 +1,5 @@
-/* ---------------- */
 /* #region بخش اصلی */
-/* ---------------- */
+
 #search-sheet {
   position: fixed;
   height: 95%;
@@ -59,7 +58,7 @@
   background-color: var(--color_primary_light_50);
 }
 
-/* #endregion بخش اصلی */
+/* #endregion بخش اصلی -------------------------------------------- */
 
 /* محتوای اصلی صفحه جستجو */
 #search-sheet .content {
@@ -79,9 +78,8 @@
   position: relative;
 }
 
-/* --------------------- */
 /* #region تاریخچه جستجو */
-/* --------------------- */
+
 #history-container {
   width: 100%;
   flex-grow: 1;
@@ -132,11 +130,10 @@
   opacity: 1;
 }
 
-/* #endregion تاریخچه جستجو */
+/* #endregion تاریخچه جستجو --------------------------------------- */
 
-/* ------------------- */
 /* #region نتایج جستجو */
-/* ------------------- */
+
 #search-sheet .result-container {
   width: 100%;
   flex-grow: 1;
@@ -227,4 +224,4 @@
   background-color: var(--color_primary_light_50);
 }
 
-/* #endregion نتایج جستجو */
+/* #endregion نتایج جستجو ----------------------------------------- */

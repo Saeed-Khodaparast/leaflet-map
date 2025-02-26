@@ -13,6 +13,7 @@ const DORSA_API_KEY = "service.c97de0690591474fa692d23586344505";
 const SEARCH_INPUT_DELAY = 500;
 const SEARCH_HISTORY_KEY = "searchHistory";
 const CHECK_COUNTRY_DELAY = 1000;
+const NESHAN_REVERSE_DELAY = 700;
 
 // DOM
 const returnBtn = document.getElementById("return-btn");
@@ -44,7 +45,7 @@ const svgMarkerUser = `
       viewBox="0 0 80 80"
     >
       <!-- دایره دارای انیمیشن کمرنگ شونده -->
-      <circle class="pulsing-circle" cx="40" cy="40" r="10" />
+      <circle class="pulsing-circle" cx="40" cy="40" r="10"/>
       <!-- دایره داخلی ثابت -->
       <circle class="inner-circle" cx="40" cy="40" r="10" />
     </svg>
@@ -77,7 +78,7 @@ let firstLaunch = true;
 /** آیا محدوده روی نقشه نمایش یابد */
 let isBoundaryShow = false;
 /** آیا از محدوده استفاده شود */
-let isBoundaryUse = true;
+let isBoundaryUse = false;
 /**  آیا موقعیت > آدرس نومیناتیم فعال است */
 let isNominatimReverseEnabled = false;
 
@@ -191,7 +192,7 @@ if (navigator.geolocation) {
 // دکمه بازگشت به موقعیت کاربر
 returnBtn.addEventListener("click", () => {
   if (userLocation.lat && userLocation.lng) {
-    map.setView([userLocation.lat, userLocation.lng]); // بازگشت به موقعیت کاربر
+    map.flyTo([userLocation.lat, userLocation.lng]); // بازگشت به موقعیت کاربر
     userMarker.setLatLng([userLocation.lat, userLocation.lng]); // حرکت مارکر به موقعیت کاربر
     console.log("User location:", userLocation);
   } else {
@@ -209,8 +210,13 @@ map.on("move", updateCoordinates);
 
 // بلند شدن مارکر با حرکت نقشه
 map.on("movestart", function () {
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+  }
   marker.classList.add("lifting");
   outOfBorder.classList.remove("active");
+  input.value = "";
 });
 
 // پایین آمدن مارکر با توقف نقشه و حستجوی آدرس
@@ -233,18 +239,28 @@ map.on("moveend", function () {
     }
   }
 
-  //isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-    //console.log("Check Country Timer Cleared");
+  if (isNeshanReverseEnabled) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    timeoutId = setTimeout(() => {
+      reverseGeocode(center.lat, center.lng);
+    }, NESHAN_REVERSE_DELAY);
   }
-  timeoutId = setTimeout(() => {
-    isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
-    isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
-    //checkCity(center.lat, center.lng);
-    //console.log("Check Country Timer Set");
-  }, CHECK_COUNTRY_DELAY);
+
+  if (isNominatimReverseEnabled) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+      //console.log("Check Country Timer Cleared");
+    }
+    timeoutId = setTimeout(() => {
+      checkCountry(center.lat, center.lng);
+      //checkCity(center.lat, center.lng);
+      //console.log("Check Country Timer Set");
+    }, CHECK_COUNTRY_DELAY);
+  }
 });
 
 // #endregion نقشه -------------------
@@ -789,6 +805,33 @@ function isPointInPolygon(point, geoJSON) {
 
   // If results array has any elements, the point is inside
   return results.length > 0;
+}
+
+function showLoadingDots() {
+  const input = document.getElementById("input");
+  let dots = "";
+  let count = 0;
+
+  input.value = "";
+
+  const interval = setInterval(() => {
+    dots += ".";
+    count++;
+
+    if (count > 3) {
+      dots = "";
+      count = 0;
+    }
+
+    input.value = dots;
+  }, 500);
+
+  return interval; // Return interval ID to clear it later
+}
+
+function stopLoading(intervalId) {
+  clearInterval(intervalId);
+  input.value = "";
 }
 
 // #endregion تابع ها -----------------------------------------------
