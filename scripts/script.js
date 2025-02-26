@@ -1,11 +1,15 @@
 // #region ثابت ها
 
+/** مختصات تهران */
 const TEHRAN_COORDINATES = [35.688812, 51.389626];
+/** مختصات تبریز */
 const TABRIZ_COORDINATES = [38.074109, 46.29626];
+/** مختصات زنجان */
 const ZANJAN_COORDINATES = [36.679453, 48.499864];
 
+/** Neshan api key that belongs to dorsa service  */
 const DORSA_API_KEY = "service.c97de0690591474fa692d23586344505";
-// میزان تاخیر به میلی ثانیه برای فیلد جستجو
+
 const SEARCH_INPUT_DELAY = 500;
 const SEARCH_HISTORY_KEY = "searchHistory";
 const CHECK_COUNTRY_DELAY = 1000;
@@ -29,7 +33,6 @@ const emptyState = document.getElementById("empty-state");
 const clearBtn = document.getElementById("clear-btn");
 const searchCloseBtn = document.getElementById("search-close-btn");
 
-// ساخت آبجکت از کلاس های ای پی آی نقشه
 const neshan = new Neshan(DORSA_API_KEY);
 const nominatim = new Nominatim();
 
@@ -54,72 +57,95 @@ const userMarkerIcon = L.divIcon({
   iconAnchor: [40, 40],
 });
 
-// #endregion ثابت ها
+// #endregion ثابت ها ------------------------------------------------
 
 // #region متغیر ها
 
 /** نقشه */
-let map;
-let iranBoundary;
+let map = null;
+/** محدوده پوشش */
+let coverageBoundary = null;
 /** آیدی تایمر فیلد جستجو */
-let timeoutId;
-/** تعیین وضعیت باز بودن مودال */
-let isModalOpen;
-/** تعیین وضعیت باز بودن صفحه جستجو */
-let isSearchOpen;
-/** فعال و غیر فعالسازی نومیناتیم رورس ای پی آی */
-let isNominatimReverseEnabled = false;
-let isNeshanReverseEnabled = true;
-/** فعال و غیر فعالسازی نشان ژوکودینگ ای پی آی */
-let isNeshanGeocodingEnabled = true;
-/** فعال و غیر فعالسازی نشان سرچ ای پی آی */
-let isNeshanSearchEnabled = true;
+let timeoutId = null;
 /** مارکر موقعیت داینامیک کاربر */
-let userMarker;
+let userMarker = null;
 /** موقعیت داینامیک کاربر */
 let userLocation = { lat: null, lng: null };
 /** متغیر برای حرکت نقشه به موقعیت کاربر در اجرای اولیه */
 let firstLaunch = true;
 
-// #endregion متغیر ها
+/** آیا محدوده روی نقشه نمایش یابد */
+let isBoundaryShow = false;
+/** آیا از محدوده استفاده شود */
+let isBoundaryUse = true;
+/**  آیا موقعیت > آدرس نومیناتیم فعال است */
+let isNominatimReverseEnabled = false;
+
+/** آیا موقعیت > آدرس نشان فعال است */
+let isNeshanReverseEnabled = true;
+/** آیا آدرس > موقعیت نشان فعال است */
+let isNeshanGeocodingEnabled = true;
+/** آیا جستجوی نشان فعال است */
+let isNeshanSearchEnabled = true;
+
+/** آیا مودال باز است */
+let isModalOpen = false;
+/** آیا صفحه جستجو باز است*/
+let isSearchOpen = false;
+
+// #endregion متغیر ها ------------------------------------------------
 
 // #region اجرای کد ها
 
-// Initialize map
+// #region ساخت اولیه نقشه لیفلت
 map = L.map("map", {
   center: TABRIZ_COORDINATES,
   zoom: 13,
 });
 
+// انتخاب ظاهر نقشه
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
 
-// Load and parse the GeoJSON file
-// fetch("tabriz-geojson.json")
-//   .then((response) => response.json())
-//   .then((data) => {
-//     iranBoundary = data;
-//     // Add the GeoJSON layer to the map
-//     L.geoJSON(data, {
-//       style: {
-//         color: "#ff0000", // Border color
-//         weight: 2, // Border width
-//         fillColor: "#ff780022", // Fill color
-//         fillOpacity: 0.2, // Fill opacity
-//       },
-//     }).addTo(map);
-//   });
+if (isBoundaryUse) {
+  // فچ کردن اطلاعات محدوده از فایل مربوطه
+  fetch("tabriz-province.geojson")
+    .then((response) => response.json())
+    .then((data) => {
+      coverageBoundary = data;
+      L.geoJSON(
+        coverageBoundary,
+        isBoundaryShow
+          ? {
+              style: {
+                color: "#ff0000", // رنگ حاشیه
+                weight: 2, // عرض حاشیه
+                fillColor: "#ff780022", // رنگ داحل محدوده
+                fillOpacity: 0.2, // اپاسیتی داخل محدوده
+              },
+            }
+          : {
+              style: {
+                color: "#00000000", // رنگ حاشیه
+                fillColor: "#ff780000", // رنگ داحل محدوده
+              },
+            }
+      ).addTo(map);
+    });
+}
 
-// Update show coordinates values
+// #endregion ساخت اولیه نقشه لیفلت ----------------
+
+// نمایش طول و عرض جغرافیایی
 updateCoordinates();
 
-// Show address in field
+// نمایش آدرس داخل فیلد
 const center = map.getCenter();
 isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
 
-// Check user location continously
+// بررسی موقعیت کاربر بصورت مداوم
 if (navigator.geolocation) {
   navigator.geolocation.watchPosition(updateUserPosition, (error) => {
     firstLaunch = false;
@@ -158,9 +184,9 @@ if (navigator.geolocation) {
   resetUserLocation();
 }
 
-// #endregion اجرای کد ها
+// #endregion اجرای کد ها ---------------------------------------------
 
-// #region Listeners
+// #region شنوندگان
 
 // دکمه بازگشت به موقعیت کاربر
 returnBtn.addEventListener("click", () => {
@@ -173,11 +199,12 @@ returnBtn.addEventListener("click", () => {
   }
 });
 
+// #region نقشه
 map.on("click", function (e) {
-  map.setView(e.latlng);
+  map.flyTo(e.latlng);
 });
 
-// بروزرسانی مختصات با حرکت نقشه
+// بروزرسانی نمایش طول و عرض جغرافیایی با حرکت نقشه
 map.on("move", updateCoordinates);
 
 // بلند شدن مارکر با حرکت نقشه
@@ -186,13 +213,16 @@ map.on("movestart", function () {
   outOfBorder.classList.remove("active");
 });
 
-//  پایین آمدن مارکر با توقف نقشه و حستجوی آدرس
+// پایین آمدن مارکر با توقف نقشه و حستجوی آدرس
 map.on("moveend", function () {
   marker.classList.remove("lifting");
   const center = map.getCenter();
 
-  if (iranBoundary) {
-    const isInside = isPointInPolygon([center.lat, center.lng], iranBoundary);
+  if (coverageBoundary) {
+    const isInside = isPointInPolygon(
+      [center.lat, center.lng],
+      coverageBoundary
+    );
 
     if (!isInside) {
       console.log("Map center is outside Iran borders");
@@ -203,18 +233,21 @@ map.on("moveend", function () {
     }
   }
 
-  isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
+  //isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
   if (timeoutId) {
     clearTimeout(timeoutId);
     timeoutId = null;
     //console.log("Check Country Timer Cleared");
   }
   timeoutId = setTimeout(() => {
+    isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
     isNominatimReverseEnabled && checkCountry(center.lat, center.lng);
     //checkCity(center.lat, center.lng);
     //console.log("Check Country Timer Set");
   }, CHECK_COUNTRY_DELAY);
 });
+
+// #endregion نقشه -------------------
 
 // باز شدن صفحه جستجو با فوکوس شدن فیلد یا کلیک روی آیکون
 input.addEventListener("focus", openSearchSheet);
@@ -263,11 +296,11 @@ clearBtn.addEventListener("click", (e) => {
 // بسته شدن صفحه جستجو با زدن دکمه بستن
 searchCloseBtn.addEventListener("click", closeSearchSheet);
 
-// #endregion Listeners
+// #endregion شنوندگان -----------------------------------------------
 
-// #region Functions
+// #region تابع ها
 
-/** به‌روزرسانی مختصات در هنگام تغییر نقشه */
+/** به‌روزرسانی نمایشگر طول و عرض جغرافیایی */
 function updateCoordinates() {
   const center = map.getCenter();
   coordinatesDisplay.innerHTML = `Latitude: ${center.lat.toFixed(
@@ -758,4 +791,4 @@ function isPointInPolygon(point, geoJSON) {
   return results.length > 0;
 }
 
-// #endregion Functions
+// #endregion تابع ها -----------------------------------------------
