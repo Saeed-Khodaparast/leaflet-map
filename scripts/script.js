@@ -69,7 +69,7 @@ let isModalOpen;
 let isSearchOpen;
 /** فعال و غیر فعالسازی نومیناتیم رورس ای پی آی */
 let isNominatimReverseEnabled = false;
-let isNeshanReverseEnabled = false;
+let isNeshanReverseEnabled = true;
 /** فعال و غیر فعالسازی نشان ژوکودینگ ای پی آی */
 let isNeshanGeocodingEnabled = true;
 /** فعال و غیر فعالسازی نشان سرچ ای پی آی */
@@ -97,20 +97,20 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 // Load and parse the GeoJSON file
-fetch("tabriz-geojson.json")
-  .then((response) => response.json())
-  .then((data) => {
-    iranBoundary = data;
-    // Add the GeoJSON layer to the map
-    L.geoJSON(data, {
-      style: {
-        color: "#ff0000", // Border color
-        weight: 2, // Border width
-        fillColor: "#ff780022", // Fill color
-        fillOpacity: 0.2, // Fill opacity
-      },
-    }).addTo(map);
-  });
+// fetch("tabriz-geojson.json")
+//   .then((response) => response.json())
+//   .then((data) => {
+//     iranBoundary = data;
+//     // Add the GeoJSON layer to the map
+//     L.geoJSON(data, {
+//       style: {
+//         color: "#ff0000", // Border color
+//         weight: 2, // Border width
+//         fillColor: "#ff780022", // Fill color
+//         fillOpacity: 0.2, // Fill opacity
+//       },
+//     }).addTo(map);
+//   });
 
 // Update show coordinates values
 updateCoordinates();
@@ -348,6 +348,7 @@ function reverseGeocode(lat, lng) {
     .reverseGeocode(lat, lng)
     .then((data) => {
       console.log("Neshan Reverse response: ", data);
+      checkLocationCoverage(data);
       input.value = data.formatted_address;
     })
     .catch((error) => {
@@ -631,6 +632,68 @@ function checkCountry(lat, lng) {
       console.error("Nominatim Reverse Fetch Error: ", error);
       showToast("خطایی رخ داده است لطفا دوباره امتحان کنید");
     });
+}
+
+function checkLocationCoverage(data) {
+  const iranProvinces = {
+    provinces: [
+      "استان آذربایجان شرقی",
+      "استان آذربایجان غربی",
+      "استان اردبیل",
+      "استان اصفهان",
+      "استان البرز",
+      "استان ایلام",
+      "استان بوشهر",
+      "استان تهران",
+      "استان چهارمحال و بختیاری",
+      "استان خراسان جنوبی",
+      "استان خراسان رضوی",
+      "استان خراسان شمالی",
+      "استان خوزستان",
+      "استان زنجان",
+      "استان سمنان",
+      "استان سیستان و بلوچستان",
+      "استان فارس",
+      "استان قزوین",
+      "استان قم",
+      "استان کردستان",
+      "استان کرمان",
+      "استان کرمانشاه",
+      "استان کهگیلویه و بویراحمد",
+      "استان گلستان",
+      "استان گیلان",
+      "استان لرستان",
+      "استان مازندران",
+      "استان مرکزی",
+      "استان هرمزگان",
+      "استان همدان",
+      "استان یزد",
+    ],
+  };
+
+  if (data.state && iranProvinces.provinces.includes(data.state)) {
+    console.log("Location is inside Iran");
+    outOfBorder.classList.remove("active");
+  } else {
+    console.log("Location is outside Iran");
+    outOfBorder.classList.add("active");
+  }
+
+  if (data.county && data.county === "شهرستان تبریز") {
+    console.log("Location is inside Tabriz county");
+    outOfBorder.classList.remove("active");
+  } else {
+    console.log("Location is outside Tabriz county");
+    outOfBorder.classList.add("active");
+  }
+
+  if (data.city && data.city === "تبریز") {
+    console.log("Location is inside Tabriz city");
+    outOfBorder.classList.remove("active");
+  } else {
+    console.log("Location is outside Tabriz city");
+    outOfBorder.classList.add("active");
+  }
 }
 
 function checkCity(lat, lng) {
