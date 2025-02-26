@@ -679,6 +679,14 @@ function checkLocationCoverage(data) {
     outOfBorder.classList.add("active");
   }
 
+  if (data.state && data.state === "استان آذربایجان شرقی") {
+    console.log("Location is inside Tabriz province");
+    outOfBorder.classList.remove("active");
+  } else {
+    console.log("Location is outside Tabriz province");
+    outOfBorder.classList.add("active");
+  }
+
   if (data.county && data.county === "شهرستان تبریز") {
     console.log("Location is inside Tabriz county");
     outOfBorder.classList.remove("active");
