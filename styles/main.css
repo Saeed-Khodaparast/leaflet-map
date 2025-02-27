@@ -64,11 +64,11 @@
   position: absolute;
   top: 24px;
   right: 24px;
-  padding: 12px 20px;
+  padding: 12px;
   background-color: var(--color_primary);
   color: white;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   font-size: 16px;
   cursor: pointer;
   z-index: 999;
@@ -85,11 +85,25 @@
   transform: translate(0px, -55px);
 }
 
+.marker-container {
+  position: absolute;
+  top: calc(
+    50% - 4.3%
+  ); /* 5٪ ارتفاع مارکر است که پایین آن روی نقطه بنشیند نه وسط آن */
+  left: 50%;
+  height: 48px;
+  pointer-events: none; /* غیرقابل کلیک */
+  z-index: 1000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  background-color: red;
+}
+
 /* مارکر وسط صفحه */
 #marker {
   position: absolute;
   top: calc(
-    50% - 5%
+    50% - 4.3%
   ); /* 5٪ ارتفاع مارکر است که پایین آن روی نقطه بنشیند نه وسط آن */
   left: 50%;
   height: 48px;
@@ -100,8 +114,24 @@
 }
 #marker.lifting {
   /* حرکت به بالا و بزرگ‌تر شدن */
-  transform: translate(-50%, -70%) scale(1.2);
+  transform: translate(-50%, -80%) scale(1.2);
   opacity: 0.8; /* کاهش شفافیت */
+}
+
+#marker-circle {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 32px;
+  left: -12px;
+}
+
+#marker-circle.lifting {
+  width: 32px;
+  height: 32px;
+  top: 28px;
+  left: -16px;
+  opacity: 0.8;
 }
 
 /* اعلان */

@@ -22,6 +22,7 @@ const MAP_CP_ZOOM = 18;
 const returnBtn = document.getElementById("return-btn");
 const outOfBorder = document.getElementById("out-of-border");
 const marker = document.getElementById("marker");
+const markerCircle = document.getElementById("marker-circle");
 const coordinatesDisplay = document.getElementById("coordinates");
 const input = document.getElementById("input");
 const inputBtn = document.getElementById("input-btn");
@@ -97,6 +98,8 @@ let isModalOpen = false;
 /** آیا صفحه جستجو باز است*/
 let isSearchOpen = false;
 
+let centerCircle = null;
+
 // #endregion متغیر ها ------------------------------------------------
 
 // #region اجرای کد ها
@@ -115,6 +118,16 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
+
+// افزودن دایره وسط نقشه
+// centerCircle = L.circle(map.getCenter(), {
+//   color: "#0000",
+//   fillColor: "#000",
+//   fillOpacity: 0,
+//   radius: 4,
+//   weight: 1,
+//   interactive: false,
+// }).addTo(map);
 
 if (isBoundaryUse) {
   // فچ کردن اطلاعات محدوده از فایل مربوطه
@@ -212,7 +225,9 @@ map.on("click", function (e) {
 });
 
 // بروزرسانی نمایش طول و عرض جغرافیایی با حرکت نقشه
-map.on("move", updateCoordinates);
+map.on("move", () => {
+  updateCoordinates();
+});
 
 // بلند شدن مارکر با حرکت نقشه
 map.on("movestart", function () {
@@ -317,6 +332,16 @@ clearBtn.addEventListener("click", (e) => {
 
 // بسته شدن صفحه جستجو با زدن دکمه بستن
 searchCloseBtn.addEventListener("click", closeSearchSheet);
+
+document.addEventListener("mousedown", () => {
+  marker.classList.add("lifting");
+  markerCircle.classList.add("lifting");
+});
+
+document.addEventListener("mouseup", () => {
+  marker.classList.remove("lifting");
+  markerCircle.classList.remove("lifting");
+});
 
 // #endregion شنوندگان -----------------------------------------------
 
