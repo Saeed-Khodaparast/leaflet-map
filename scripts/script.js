@@ -13,7 +13,7 @@ const DORSA_API_KEY = "service.c97de0690591474fa692d23586344505";
 const SEARCH_INPUT_DELAY = 500;
 const SEARCH_HISTORY_KEY = "searchHistory";
 const CHECK_COUNTRY_DELAY = 1000;
-const NESHAN_REVERSE_DELAY = 700;
+const NESHAN_REVERSE_DELAY = 500;
 
 /** میزان زوم نقشه در هنگام تغییر موقعیت */
 const MAP_CP_ZOOM = 18;
@@ -88,7 +88,7 @@ let isBoundaryUse = false;
 let isNominatimReverseEnabled = false;
 
 /** آیا موقعیت > آدرس نشان فعال است */
-let isNeshanReverseEnabled = false;
+let isNeshanReverseEnabled = true;
 /** آیا آدرس > موقعیت نشان فعال است */
 let isNeshanGeocodingEnabled = true;
 /** آیا جستجوی نشان فعال است */
@@ -165,6 +165,8 @@ updateCoordinates();
 // نمایش آدرس داخل فیلد
 const center = map.getCenter();
 isNeshanReverseEnabled && reverseGeocode(center.lat, center.lng);
+
+switchElement.checked = isNeshanReverseEnabled;
 
 // بررسی موقعیت کاربر بصورت مداوم
 if (navigator.geolocation) {
@@ -345,6 +347,10 @@ clearBtn.addEventListener("click", (e) => {
 searchCloseBtn.addEventListener("click", closeSearchSheet);
 
 document.addEventListener("mousedown", () => {
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
+  }
   marker.classList.add("lifting");
   markerCircle.classList.add("lifting");
 });
