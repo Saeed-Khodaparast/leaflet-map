@@ -3,7 +3,7 @@
 /** مختصات تهران */
 const TEHRAN_COORDINATES = [35.688812, 51.389626];
 /** مختصات تبریز */
-const TABRIZ_COORDINATES = [38.074109, 46.29626];
+const TABRIZ_COORDINATES = [38.074115, 46.296258];
 /** مختصات زنجان */
 const ZANJAN_COORDINATES = [36.679453, 48.499864];
 
@@ -14,6 +14,9 @@ const SEARCH_INPUT_DELAY = 500;
 const SEARCH_HISTORY_KEY = "searchHistory";
 const CHECK_COUNTRY_DELAY = 1000;
 const NESHAN_REVERSE_DELAY = 700;
+
+/** میزان زوم نقشه در هنگام تغییر موقعیت */
+const MAP_CP_ZOOM = 18;
 
 // DOM
 const returnBtn = document.getElementById("return-btn");
@@ -83,7 +86,7 @@ let isBoundaryUse = false;
 let isNominatimReverseEnabled = false;
 
 /** آیا موقعیت > آدرس نشان فعال است */
-let isNeshanReverseEnabled = true;
+let isNeshanReverseEnabled = false;
 /** آیا آدرس > موقعیت نشان فعال است */
 let isNeshanGeocodingEnabled = true;
 /** آیا جستجوی نشان فعال است */
@@ -102,6 +105,9 @@ let isSearchOpen = false;
 map = L.map("map", {
   center: TABRIZ_COORDINATES,
   zoom: 13,
+  scrollWheelZoom: "center",
+  zoomControl: false,
+  attributionControl: false,
 });
 
 // انتخاب ظاهر نقشه
@@ -192,7 +198,7 @@ if (navigator.geolocation) {
 // دکمه بازگشت به موقعیت کاربر
 returnBtn.addEventListener("click", () => {
   if (userLocation.lat && userLocation.lng) {
-    map.flyTo([userLocation.lat, userLocation.lng]); // بازگشت به موقعیت کاربر
+    map.flyTo([userLocation.lat, userLocation.lng], MAP_CP_ZOOM); // بازگشت به موقعیت کاربر
     userMarker.setLatLng([userLocation.lat, userLocation.lng]); // حرکت مارکر به موقعیت کاربر
     console.log("User location:", userLocation);
   } else {
@@ -345,7 +351,7 @@ function updateUserPosition(position) {
   // حرکت نقشه به موقعیت کاربر فقط در هنگام اجرای اولیه
   if (firstLaunch) {
     // حرکت نقشه به موقعیت کاربر
-    map.setView([userLat, userLng]);
+    map.flyTo([userLat, userLng], MAP_CP_ZOOM);
     // به‌روزرسانی مختصات نمایش داده شده
     updateCoordinates();
     firstLaunch = false;
@@ -435,7 +441,7 @@ function geocode(address) {
       const lat = data.location.y;
       const lng = data.location.x;
 
-      map.setView([lat, lng]);
+      map.flyTo([lat, lng], MAP_CP_ZOOM);
     })
     .catch((error) => {
       console.error("Neshan Geocoding Fetch Error: ", error);
@@ -502,7 +508,7 @@ function displaySearchResult(items) {
     // تعریف رویداد کلیک لیست آیتم
     listItem.addEventListener("click", () => {
       input.value = item.address;
-      map.setView([item.location.y, item.location.x]);
+      map.flyTo([item.location.y, item.location.x], MAP_CP_ZOOM);
       addToSearchHistory(item);
       searchSheet.classList.remove("open");
       backdrop.classList.remove("active");
@@ -571,7 +577,7 @@ function displaySearchHistory() {
       // تعریف رویداد کلیک لیست آیتم
       historyListItem.addEventListener("click", () => {
         input.value = item.address;
-        map.setView([item.location.y, item.location.x]);
+        map.flyTo([item.location.y, item.location.x], MAP_CP_ZOOM);
         searchSheet.classList.remove("open");
         backdrop.classList.remove("active");
         resetSearchSheet();
