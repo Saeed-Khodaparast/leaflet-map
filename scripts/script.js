@@ -20,6 +20,7 @@ const MAP_CP_ZOOM = 18;
 
 // DOM
 const returnBtn = document.getElementById("return-btn");
+const switchElement = document.getElementById("switch");
 const outOfBorder = document.getElementById("out-of-border");
 const marker = document.getElementById("marker");
 const markerCircle = document.getElementById("marker-circle");
@@ -216,6 +217,16 @@ returnBtn.addEventListener("click", () => {
     console.log("User location:", userLocation);
   } else {
     showToast("موقعیت کاربر در دسترس نیست", { type: "warning" });
+  }
+});
+
+switchElement.addEventListener("change", function () {
+  if (this.checked) {
+    console.log("Neshan is ON");
+    isNeshanReverseEnabled = true;
+  } else {
+    console.log("Neshan is OFF");
+    isNeshanReverseEnabled = false;
   }
 });
 
