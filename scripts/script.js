@@ -1,3 +1,5 @@
+//import { OfflineMapManager } from "./classes/offlineMap";
+
 // #region ثابت ها
 
 /** مختصات تهران */
@@ -88,7 +90,7 @@ let isBoundaryUse = false;
 let isNominatimReverseEnabled = false;
 
 /** آیا موقعیت > آدرس نشان فعال است */
-let isNeshanReverseEnabled = true;
+let isNeshanReverseEnabled = false;
 /** آیا آدرس > موقعیت نشان فعال است */
 let isNeshanGeocodingEnabled = true;
 /** آیا جستجوی نشان فعال است */
@@ -108,27 +110,29 @@ let centerCircle = null;
 // #region ساخت اولیه نقشه لیفلت
 map = L.map("map", {
   center: TABRIZ_COORDINATES,
+  preferCanvas: true,
+  minZoom: 5,
+  maxZoom: 19,
   zoom: 13,
-  scrollWheelZoom: "center",
   zoomControl: false,
+  scrollWheelZoom: "center",
   attributionControl: false,
 });
 
 // انتخاب ظاهر نقشه
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  tileSize: 256,
+  updateWhenIdle: true,
+  updateWhenZooming: false,
+  updateInterval: 150,
+  keepBuffer: 2,
+  maxNativeZoom: 18,
+  minNativeZoom: 5,
+  zoomOffset: 0,
   maxZoom: 19,
+  loadingControl: true,
   attribution: "© OpenStreetMap contributors",
 }).addTo(map);
-
-// افزودن دایره وسط نقشه
-// centerCircle = L.circle(map.getCenter(), {
-//   color: "#0000",
-//   fillColor: "#000",
-//   fillOpacity: 0,
-//   radius: 4,
-//   weight: 1,
-//   interactive: false,
-// }).addTo(map);
 
 if (isBoundaryUse) {
   // فچ کردن اطلاعات محدوده از فایل مربوطه
@@ -157,7 +161,7 @@ if (isBoundaryUse) {
     });
 }
 
-// #endregion ساخت اولیه نقشه لیفلت ----------------
+// #endregion ساخت اولیه نقشه لیفلت
 
 // نمایش طول و عرض جغرافیایی
 updateCoordinates();
@@ -880,6 +884,15 @@ function showLoadingDots() {
 function stopLoading(intervalId) {
   clearInterval(intervalId);
   input.value = "";
+}
+
+function loadFeaturesInBounds(bounds) {
+  // Load your features here based on bounds
+  // Example:
+  const visibleFeatures = features.filter((feature) =>
+    bounds.contains(L.latLng(feature.lat, feature.lng))
+  );
+  // Add only visible features to map
 }
 
 // #endregion تابع ها -----------------------------------------------
